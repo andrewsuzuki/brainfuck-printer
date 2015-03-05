@@ -1,31 +1,27 @@
 class BrainfuckPrinter
-	def initialize(statement = nil)
+	def initialize(statement = "", delim = "")
 		set_statement(statement)
+		@delim = delim
 	end
 
 	def statement
 		@statement
 	end
 
+	def delim
+		@delim
+	end
+
 	def set_statement(statement)
 		@statement = statement
 	end
 
-	def print_bytes()
-		statement().each_byte do |c|
-			puts c
-		end
+	def set_delim(delim)
+		@delim = delim
 	end
 
 	def output()
-		# TODO: have a candidate for part1 where it instead uses the 10 stored in cell#0
-		# and uses that as the basis (copy and modify) for that cell
-		# and same kinda thing for part2 i guess
 		bytes = statement().bytes.to_a
-		todo = bytes
-		uniques = [] 
-		copies = []
-		close_enoughs = []
 
 		part1 = []
 		part2 = []
@@ -35,17 +31,18 @@ class BrainfuckPrinter
 			nearest_10 = c.round(-1) # get c's closest multiple of 10
 			part1_times = nearest_10 / 10
 
+			# determine +/- depending on comparison with c
 			plus_or_minus = lambda {|nearest| if nearest < c then "+" else "-" end }
 			
-			base_of_10m = ">" + ("+" * part1_times)
-
 			candidates = []
+
+			base_of_10m = ">" + ("+" * part1_times)
 			
 			candidates.push(["", (plus_or_minus.call(previous) * (c - previous).abs) + "."])	
 
 			candidates.push([base_of_10m, ">" + (plus_or_minus.call(nearest_10) * (c - nearest_10).abs) + "."])
 			
-			# determine winner (shortest)
+			# determine winner (whatever's shortest)
 			candidate_lengths = []
 			candidates.each {|can| candidate_lengths.push(can[0].length + can[1].length) }
 			winner = candidate_lengths.each_with_index.min[1]
@@ -53,16 +50,19 @@ class BrainfuckPrinter
 			part1.push(candidates[winner][0])
 			part2.push(candidates[winner][1])
 
+			# keep track of previous
 			previous = c
 		end
+
+		p_delim = lambda {|string| print string + delim() }
 		
-		print '++++++++++'
-		print '['
-		print part1.join()
-		print "<" * part1.count {|x| x != "" }
-		print "-"
-		print ']'
-		print part2.join()
+		p_delim.call("++++++++++")
+		p_delim.call("[")
+		p_delim.call(part1.reject!(&:empty?).join(delim()))
+		p_delim.call("<" * part1.count {|x| x != "" })
+		p_delim.call("-")
+		p_delim.call("]")
+		print part2.join(delim())
 		puts ""
 	end
 end
