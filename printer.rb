@@ -26,7 +26,8 @@ class BrainfuckPrinter
 		part1 = []
 		part2 = []
 
-		previous = 0
+		cells = [0]
+
 		bytes.each_with_index do |c, i|
 			nearest_10 = c.round(-1) # get c's closest multiple of 10
 			part1_times = nearest_10 / 10
@@ -38,9 +39,15 @@ class BrainfuckPrinter
 
 			base_of_10m = ">" + ("+" * part1_times)
 			
-			candidates.push(["", (plus_or_minus.call(previous) * (c - previous).abs) + "."])	
+			# c1: create base in loop (multiple of ten), then increment/decrement
+			candidates.push([base_of_10m, ">" + (plus_or_minus.call(nearest_10) * (c - nearest_10).abs) + ".", lambda {cells.push(c)}])
 
-			candidates.push([base_of_10m, ">" + (plus_or_minus.call(nearest_10) * (c - nearest_10).abs) + "."])
+			# c2: shift to previous cells (or not), modify, print, then shift back
+			cells.each_with_index do |cell, i|
+				if i == 0 then next end # skip first false cell
+				shift = cells.count - i - 1 # determine shifts to make to get to cell and back
+				candidates.push(["", ("<" * shift) + (plus_or_minus.call(cell) * (c - cell).abs) + "." + (">" * shift), lambda {cells[i] = c}])
+			end
 			
 			# determine winner (whatever's shortest)
 			candidate_lengths = []
@@ -50,8 +57,7 @@ class BrainfuckPrinter
 			part1.push(candidates[winner][0])
 			part2.push(candidates[winner][1])
 
-			# keep track of previous
-			previous = c
+			candidates[winner][2].call() # execute winning candidate's lamda
 		end
 
 		p_delim = lambda {|string| print string + delim() }
@@ -62,7 +68,20 @@ class BrainfuckPrinter
 		p_delim.call("<" * part1.count {|x| x != "" })
 		p_delim.call("-")
 		p_delim.call("]")
-		print part2.join(delim())
+
+		part2_str = part2.join(delim())
+		# optimize by removing side-by-side shifts and such
+		remove = ["><", "<>", "+-", "-+"]
+		includes = lambda { remove.each { |rep| if part2_str.include?(rep) then return true end }; return false }
+		while includes.call()
+			remove.each {|rep| part2_str.gsub!(rep, "") }
+		end
+		# remove tail not-periods
+		until part2_str[-1] == '.'
+			part2_str = part2_str[0..-2]
+		end
+		print part2_str
+
 		puts ""
 	end
 end
