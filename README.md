@@ -1,6 +1,6 @@
 # brainfuck-printer
 
-Simple command line tool to create Brainfuck programs that print strings.
+Simple command line tool to create optimized Brainfuck programs that print strings.
 
 ## Usage
 

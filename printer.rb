@@ -39,10 +39,10 @@ class BrainfuckPrinter
 
 			base_of_10m = ">" + ("+" * part1_times)
 			
-			# c1: create base in loop (multiple of ten), then increment/decrement
+			# candidate 1: create base in loop (multiple of ten), then increment/decrement
 			candidates.push([base_of_10m, ">" + (plus_or_minus.call(nearest_10) * (c - nearest_10).abs) + ".", lambda {cells.push(c)}])
 
-			# c2: shift to previous cells (or not), modify, print, then shift back
+			# candidate 2+: shift to previous cells (or not), modify, print, then shift back
 			cells.each_with_index do |cell, i|
 				if i == 0 then next end # skip first false cell
 				shift = cells.count - i - 1 # determine shifts to make to get to cell and back
@@ -62,7 +62,7 @@ class BrainfuckPrinter
 
 		p_delim = lambda {|string| print string + delim() }
 		
-		p_delim.call("++++++++++")
+		p_delim.call("+" * 10)
 		p_delim.call("[")
 		p_delim.call(part1.reject!(&:empty?).join(delim()))
 		p_delim.call("<" * part1.count {|x| x != "" })
@@ -82,6 +82,6 @@ class BrainfuckPrinter
 		end
 		print part2_str
 
-		puts ""
+		print "\n"
 	end
 end
